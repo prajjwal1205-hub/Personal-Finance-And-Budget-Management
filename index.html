@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Personal finance and budget management dashboard built with HTML, CSS, and vanilla JavaScript.">
+  <title>Khata Setu | Personal Finance Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-shell">
+    <!-- Sidebar navigation and current month summary -->
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">KS</div>
+        <div>
+          <p class="brand-kicker">Local First</p>
+          <h1>Khata Setu</h1>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav" aria-label="Primary">
+        <a href="#overview">Overview</a>
+        <a href="#transactions">Transactions</a>
+        <a href="#budget">Budget</a>
+        <a href="#analytics">Analytics</a>
+      </nav>
+
+      <div class="sidebar-bottom">
+        <section class="sidebar-card">
+          <p class="sidebar-label">Current Month</p>
+          <h2 id="sidebarMonth">Month</h2>
+          <p class="sidebar-copy" id="sidebarBudgetState">Set a monthly budget to track how far your spending can go.</p>
+        </section>
+
+        <section class="sidebar-card compact">
+          <div class="sidebar-metric">
+            <span>Budget</span>
+            <strong id="sidebarBudget">&#8377;0.00</strong>
+          </div>
+          <div class="sidebar-metric">
+            <span>Spent</span>
+            <strong id="sidebarSpent">&#8377;0.00</strong>
+          </div>
+        </section>
+      </div>
+    </aside>
+
+    <main class="main-content">
+      <!-- Hero / top summary -->
+      <header class="hero" id="overview">
+        <div class="hero-copy">
+          <p class="eyebrow">Personal Finance And Budget Management</p>
+          <h2>Track income, control expenses, and stay ahead of each monthly budget.</h2>
+          <p>
+            This dashboard stores everything in your browser using localStorage, so you can manage
+            transactions, monitor spending, and export your data without a backend.
+          </p>
+        </div>
+
+        <div class="hero-actions">
+          <button class="btn btn-primary" id="exportBtn" type="button">Export JSON</button>
+        </div>
+      </header>
+
+      <!-- High-level finance stats -->
+      <section class="stats-grid" aria-label="Dashboard summary">
+        <article class="stat-card" id="balanceCard">
+          <p class="stat-label">Total Balance</p>
+          <h3 id="totalBalance">&#8377;0.00</h3>
+          <span class="stat-copy">Income minus expenses across all saved transactions</span>
+        </article>
+
+        <article class="stat-card income-card">
+          <p class="stat-label">Total Income</p>
+          <h3 id="totalIncome">&#8377;0.00</h3>
+          <span class="stat-copy">All income entries recorded in local storage</span>
+        </article>
+
+        <article class="stat-card expense-card">
+          <p class="stat-label">Total Expenses</p>
+          <h3 id="totalExpenses">&#8377;0.00</h3>
+          <span class="stat-copy">All expense entries recorded in local storage</span>
+        </article>
+
+        <article class="stat-card budget-card" id="remainingBudgetCard">
+          <p class="stat-label">Remaining Budget</p>
+          <h3 id="remainingBudget">&#8377;0.00</h3>
+          <span class="stat-copy" id="remainingBudgetHelper">Set a monthly budget to track this card.</span>
+        </article>
+      </section>
+
+      <!-- Form and budget controls -->
+      <section class="workspace-grid">
+        <article class="panel" id="transactions">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Transactions</p>
+              <h3>Add or edit a transaction</h3>
+            </div>
+            <span class="status-pill" id="formModeLabel">Create Mode</span>
+          </div>
+
+          <form id="transactionForm" class="form-grid">
+            <input id="transactionId" type="hidden">
+
+            <div class="field">
+              <label for="type">Type</label>
+              <select id="type" required>
+                <option value="expense">Expense</option>
+                <option value="income">Income</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="amount">Amount</label>
+              <input id="amount" type="number" min="0.01" step="0.01" placeholder="2500" required>
+            </div>
+
+            <div class="field">
+              <label for="category">Category</label>
+              <input id="category" type="text" placeholder="Food, Salary, Rent..." required>
+            </div>
+
+            <div class="field">
+              <label for="date">Date</label>
+              <input id="date" type="date" required>
+            </div>
+
+            <div class="field field-full">
+              <label for="description">Description</label>
+              <textarea id="description" rows="4" placeholder="Add a short note for this transaction"></textarea>
+            </div>
+
+            <div class="button-row field-full">
+              <button class="btn btn-primary" id="submitBtn" type="submit">Save Transaction</button>
+              <button class="btn btn-secondary" id="cancelEditBtn" type="button" hidden>Cancel Edit</button>
+            </div>
+          </form>
+        </article>
+
+        <article class="panel" id="budget">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Budget System</p>
+              <h3>Set a monthly spending limit</h3>
+            </div>
+            <span class="status-pill neutral" id="budgetStatusPill">No Budget</span>
+          </div>
+
+          <form id="budgetForm" class="budget-form">
+            <div class="field">
+              <label for="monthlyBudget">Monthly Budget</label>
+              <input id="monthlyBudget" type="number" min="0" step="0.01" placeholder="50000" required>
+            </div>
+            <button class="btn btn-primary" type="submit">Save Budget</button>
+          </form>
+
+          <div class="budget-progress">
+            <div class="budget-progress-head">
+              <span id="budgetUsagePercent">0% used</span>
+              <strong id="budgetSpentThisMonth">Spent this month: &#8377;0.00</strong>
+            </div>
+
+            <div class="progress-track" aria-hidden="true">
+              <div class="progress-fill" id="budgetProgressFill"></div>
+            </div>
+          </div>
+
+          <div class="budget-alert" id="budgetAlertBanner" aria-live="polite">
+            <strong>Budget update</strong>
+            <p id="budgetAlertText">Budget alerts will appear here after you save a monthly target.</p>
+          </div>
+        </article>
+      </section>
+
+      <!-- Charts -->
+      <section class="charts-grid" id="analytics">
+        <article class="panel chart-panel">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Expense Breakdown</p>
+              <h3>Pie chart by category</h3>
+            </div>
+          </div>
+
+          <div class="chart-wrap">
+            <canvas id="expenseChart"></canvas>
+            <p class="chart-empty" id="expenseChartEmpty" hidden>Add expense transactions to see the category split.</p>
+          </div>
+        </article>
+
+        <article class="panel chart-panel">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Monthly Activity</p>
+              <h3>Income vs expense by month</h3>
+            </div>
+          </div>
+
+          <div class="chart-wrap">
+            <canvas id="monthlyChart"></canvas>
+            <p class="chart-empty" id="monthlyChartEmpty" hidden>Add transactions to unlock the monthly comparison chart.</p>
+          </div>
+        </article>
+      </section>
+
+      <!-- Filters and search -->
+      <section class="panel filters-panel">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Filters And Search</p>
+            <h3>Refine the transaction list</h3>
+          </div>
+          <button class="btn btn-ghost" id="resetFiltersBtn" type="button">Reset Filters</button>
+        </div>
+
+        <div class="filter-grid">
+          <div class="field">
+            <label for="filterType">Filter By Type</label>
+            <select id="filterType">
+              <option value="all">All Types</option>
+              <option value="income">Income</option>
+              <option value="expense">Expense</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="filterCategory">Filter By Category</label>
+            <select id="filterCategory">
+              <option value="all">All Categories</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="filterDate">Filter By Month</label>
+            <input id="filterDate" type="month">
+          </div>
+
+          <div class="field field-search">
+            <label for="searchInput">Search Transactions</label>
+            <input id="searchInput" type="search" placeholder="Search category, description, amount, or date">
+          </div>
+        </div>
+      </section>
+
+      <!-- Transaction table -->
+      <section class="panel table-panel">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Transaction History</p>
+            <h3>Saved records</h3>
+          </div>
+          <span class="status-pill neutral" id="transactionCount">0 transactions</span>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Type</th>
+                <th>Category</th>
+                <th>Description</th>
+                <th>Amount</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="transactionTableBody">
+              <tr>
+                <td colspan="6" class="empty-state">No transactions saved yet.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div class="toast-region" id="toastRegion" aria-live="polite" aria-atomic="true"></div>
+
+  <script defer src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script defer src="script.js"></script>
+</body>
+</html>
